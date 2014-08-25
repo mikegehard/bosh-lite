@@ -13,6 +13,8 @@
     "guest_additions_path": "/home/vagrant/VBoxGuestAdditions.iso",
     "virtualbox_version_file": ".vbox_version",
 
+    "headless": "true",
+
     "boot_wait": "10s",
     "boot_command": [
       "<esc><wait>",
