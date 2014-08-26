@@ -44,7 +44,7 @@ Vagrant.configure('2') do |config|
 
       v.keypair_name =        env.fetch('BOSH_LITE_KEYPAIR', 'bosh')
 
-      aws.ami = `curl -s https://bosh-lite-build-artifacts.s3.amazonaws.com/ami/bosh-lite-ami.list |tail -1`.chop
+      v.ami = `curl -s https://bosh-lite-build-artifacts.s3.amazonaws.com/ami/bosh-lite-ami.list |tail -1`.chop
       v.block_device_mapping = [
           {
             :DeviceName => '/dev/sda1',
@@ -63,9 +63,8 @@ Vagrant.configure('2') do |config|
       override.ssh.private_key_path = env.fetch('BOSH_LITE_PRIVATE_KEY', '~/.ssh/id_rsa_bosh')
     end
 
-    endpoint = env.include?('BOSH_LITE_SUBNET_ID') ? 'local-ipv4' : 'public-ipv4'
     PORT_FORWARDING = <<-IP_SCRIPT
-ip=`curl -s http://169.254.169.254/latest/meta-data/#{endpoint}`
+ip=`curl -s http://169.254.169.254/latest/meta-data/local-ipv4`
 echo "The IP for this instance is $ip"
 echo "You can bosh target $ip, or run vagrant ssh and then bosh target 127.0.0.1"
 echo "Setting up port forwarding for the CF Cloud Controller..."
