@@ -1,5 +1,5 @@
-VM_MEMORY = ENV.fetch("VM_MEMORY", 6*1024).to_i
-VM_CORES = ENV.fetch("VM_CORES", 4).to_i
+VM_MEMORY = ENV.fetch('VM_MEMORY', 6*1024).to_i
+VM_CORES = ENV.fetch('VM_CORES', 4).to_i
 
 # better error messages from Hash.fetch
 env = ENV.to_hash
@@ -25,23 +25,17 @@ Vagrant.configure('2') do |config|
 
     local.vm.provider :virtualbox do |v, override|
       #CDN in front of bosh-lite-build-artifacts.s3.amazonaws.com
-      override.vm.box_url = 'http://d3a4sadvqj176z.cloudfront.net/bosh-lite/latest/boshlite-virtualbox-ubuntu1404.box'
-      v.customize ["modifyvm", :id, "--memory", VM_MEMORY]
-      v.customize ["modifyvm", :id, "--cpus", VM_CORES]
-      v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-      v.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
-    end
-
-    local.vm.provider :vmware_fusion do |v, override|
-      override.vm.box_url = 'http://d3a4sadvqj176z.cloudfront.net/bosh-lite/latest/boshlite-vmware-ubuntu1404.box'
-      v.vmx["numvcpus"] = VM_CORES
-      v.vmx["memsize"] = VM_MEMORY
+      override.vm.box_url = 'http://d3a4sadvqj176z.cloudfront.net/bosh-lite/latest/bosh-lite-virtualbox-ubuntu-14-04-0.box'
+      v.customize ['modifyvm', :id, '--memory', VM_MEMORY]
+      v.customize ['modifyvm', :id, '--cpus', VM_CORES]
+      v.customize ['modifyvm', :id, '--natdnshostresolver1', 'on']
+      v.customize ['modifyvm', :id, '--natdnsproxy1', 'on']
     end
   end
 
   config.vm.define :remote do |remote|
-    remote.vm.box = 'bosh-lite-aws-test'
-    remote.vm.synced_folder ".", "/vagrant", disabled: true
+    remote.vm.box = 'boshlite-aws-ubuntu1404'
+    remote.vm.synced_folder '.', '/vagrant', disabled: true
     remote.vm.box_url = 'https://github.com/mitchellh/vagrant-aws/blob/master/dummy.box?raw=true'
 
     remote.vm.provider :aws do |v, override|
@@ -79,6 +73,6 @@ sudo iptables -t nat -A PREROUTING -p tcp -d $ip --dport 80 -j DNAT --to 10.244.
 sudo iptables -t nat -A PREROUTING -p tcp -d $ip --dport 443 -j DNAT --to 10.244.0.34:443
 sudo iptables -t nat -A PREROUTING -p tcp -d $ip --dport 4443 -j DNAT --to 10.244.0.34:4443
     IP_SCRIPT
-    remote.vm.provision :shell, :inline => PORT_FORWARDING, :upload_path => "/opt/bosh-provisioner/packer-shell.sh"
+    remote.vm.provision :shell, :inline => PORT_FORWARDING, :upload_path => '/opt/bosh-provisioner/packer-shell.sh'
   end
 end
