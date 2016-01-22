@@ -2,11 +2,18 @@
 
 set -e -x
 
+# Usage: ./provision_cf [OTHER_BOSH_MANIFEST_FRAGMENTS]
+# If you would like to override director username/password, set
+# DIRECTOR_USERNAME and DIRECTOR_PASSWORD
+
 STEMCELL_SOURCE=http://bosh-jenkins-artifacts.s3.amazonaws.com/bosh-stemcell/warden
 STEMCELL_FILE=latest-bosh-stemcell-warden.tgz
 WORKSPACE_DIR="$(cd $(dirname ${BASH_SOURCE[0]})/../../ && pwd)"
 BOSH_LITE_DIR="${WORKSPACE_DIR}/bosh-lite"
 CF_DIR="${WORKSPACE_DIR}/cf-release"
+
+DIRECTOR_USERNAME=${DIRECTOR_USERNAME:-admin}
+DIRECTOR_PASSWORD=${DIRECTOR_PASSWORD:-admin}
 
 main() {
   fetch_stemcell
@@ -24,7 +31,7 @@ fetch_stemcell() {
 upload_stemcell() {
   ip=$(bosh_lite_ip)
   bosh -n target $ip
-  bosh -n -u admin -p admin upload stemcell --skip-if-exists $STEMCELL_FILE
+  bosh -n -u $DIRECTOR_USERNAME -p $DIRECTOR_PASSWORD upload stemcell --skip-if-exists $STEMCELL_FILE
 }
 
 build_manifest() {
@@ -36,8 +43,8 @@ build_manifest() {
 
 deploy_release() {
   MOST_RECENT_CF_RELEASE=$(find ${CF_DIR}/releases -regex ".*cf-[0-9]*.yml" | sort | tail -n 1)
-  bosh -n -u admin -p admin upload release --skip-if-exists $MOST_RECENT_CF_RELEASE
-  bosh -n -u admin -p admin deploy
+  bosh -n -u $DIRECTOR_USERNAME -p $DIRECTOR_PASSWORD upload release --skip-if-exists $MOST_RECENT_CF_RELEASE
+  bosh -n -u $DIRECTOR_USERNAME -p $DIRECTOR_PASSWORD deploy
 }
 
 get_ip_from_vagrant_ssh_config() {
